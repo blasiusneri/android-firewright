@@ -22,6 +22,7 @@ import androidx.compose.foundation.lazy.staggeredgrid.StaggeredGridCells
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
@@ -68,6 +69,9 @@ fun HomeScreen(
     AndroidfirewrightTheme {
         Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
             val pokemon by viewModel.pokemonSize.collectAsState()
+            val isLoading by viewModel.isLoading.collectAsState()
+            val error by viewModel.errorMessage.collectAsState()
+
             Column(
                 modifier = Modifier
                     .fillMaxSize()
@@ -75,12 +79,43 @@ fun HomeScreen(
                 verticalArrangement = Arrangement.Center,
                 horizontalAlignment = Alignment.CenterHorizontally,
             ) {
-                if (pokemon.isNotEmpty()) {
-                    Text("Pokemon count: ${pokemon.size}")
-                }
-                LazyVerticalStaggeredGrid(columns = StaggeredGridCells.Fixed(3)) {
-                    items(pokemon.size) {
-                        PokemonItem(name = pokemon[it].name, entryNumber = pokemon[it].entryNumber, onItemClick = onItemClick)
+                when {
+                    isLoading -> {
+                        Column(
+                            modifier = Modifier.fillMaxSize(),
+                            horizontalAlignment = Alignment.CenterHorizontally,
+                            verticalArrangement = Arrangement.Center
+                        ) {
+                            CircularProgressIndicator()
+                        }
+                    }
+
+                    error != null -> {
+                        Column(
+                            modifier = Modifier.fillMaxSize(),
+                            horizontalAlignment = Alignment.CenterHorizontally,
+                            verticalArrangement = Arrangement.Center
+                        ) {
+                            Text(text = error ?: "Unknown error")
+                            Button(onClick = { viewModel.loadPokedex() }) {
+                                Text("Retry")
+                            }
+                        }
+                    }
+
+                    else -> {
+                        if (pokemon.isNotEmpty()) {
+                            Text("Pokemon count: ${pokemon.size}")
+                        }
+                        LazyVerticalStaggeredGrid(columns = StaggeredGridCells.Fixed(3)) {
+                            items(pokemon.size) {
+                                PokemonItem(
+                                    name = pokemon[it].name,
+                                    entryNumber = pokemon[it].entryNumber,
+                                    onItemClick = onItemClick
+                                )
+                            }
+                        }
                     }
                 }
             }
