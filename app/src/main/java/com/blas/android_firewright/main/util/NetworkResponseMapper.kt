@@ -9,7 +9,10 @@ class NetworkResponseMapper {
 
         fun pokedexResponseToPokemon(pokedexResponse: PokedexResponse): List<Pokemon> {
             return pokedexResponse.pokemonEntries.map { pokemonEntry ->
-                Pokemon(name = pokemonEntry.pokemonSpecies.name)
+                Pokemon(
+                    entryNumber = pokemonEntry.entryNumber,
+                    name = pokemonEntry.pokemonSpecies.name
+                )
             }
         }
     }
